@@ -37,12 +37,11 @@ def plot():
             df = data.DataReader(name=tickername,data_source="yahoo",start=0,end=date.today())
             return df
 
+    def getsp():
+        return data.DataReader(name='^GSPC',data_source = 'yahoo',start = 0, end = end)
 
-    def createGraph(start,end,tickername=tickername):
+    def createGraph(df,sp,start,end,tickername=tickername):
 
-        df = getData(tickername)
-
-        sp = data.DataReader(name='^GSPC',data_source = 'yahoo',start = 0, end = end)
         def inc_dec(c,o):
             if c>o:
                 return "Increase"
@@ -80,16 +79,13 @@ def plot():
 
 
         #setting the range with what is in the tab
-        try:
-            dfrange = data.DataReader(name=tickername,data_source="yahoo",start=start,end=end)
-        except:
-            tickername = 'TSLA'
-            dfrange = data.DataReader(name=tickername,data_source="yahoo",start=start,end=end)
 
-        sprange = data.DataReader(name='^GSPC',data_source = 'yahoo',start = start, end = end)
-        p.y_range = Range1d(dfrange.Close.min(),dfrange.Close.max())
+        dfrange = df.loc[start:end]
+        sprange = sp.loc[start:end]
+    
+        p.y_range = Range1d(dfrange.Low.min(),dfrange.High.max())
         p.x_range= Range1d(dfrange.index.min(),dfrange.index.max())
-        p.extra_y_ranges = {"foo": Range1d(start=sprange.Close.min(),end=sprange.Close.max())}
+        p.extra_y_ranges = {"foo": Range1d(start=sprange.Low.min(),end=sprange.High.max())}
         p.add_layout(LinearAxis(y_range_name="foo"),'right')
 
 
@@ -103,16 +99,18 @@ def plot():
 
         return p
 
-    # oneweekgraph = createGraph(datetime.datetime.now() - datetime.timedelta(days=7),end)
-    onemonthgraph = createGraph(datetime.datetime.now() - datetime.timedelta(days=30),end)
+    df = getData(tickername)
+    sp=getsp()
+    oneweekgraph = createGraph(df,sp,datetime.datetime.now() - datetime.timedelta(days=7),end)
+    onemonthgraph = createGraph(df,sp,datetime.datetime.now() - datetime.timedelta(days=30),end)
     # threemonthgraph = createGraph(datetime.datetime.now() - datetime.timedelta(days=90),end)
-    sixmonthgraph = createGraph(datetime.datetime.now() - datetime.timedelta(days=180),end)
-    oneyeargraph = createGraph(datetime.datetime.now() - datetime.timedelta(days=365),end)
+    sixmonthgraph = createGraph(df,sp,datetime.datetime.now() - datetime.timedelta(days=180),end)
+    oneyeargraph = createGraph(df,sp,datetime.datetime.now() - datetime.timedelta(days=365),end)
     # threeyeargraph = createGraph(datetime.datetime.now() - datetime.timedelta(days=1090),end)
-    fiveyeargraph = createGraph(datetime.datetime.now() - datetime.timedelta(days=1825),end)
+    fiveyeargraph = createGraph(df,sp,datetime.datetime.now() - datetime.timedelta(days=1825),end)
 
 
-    # tab1=Panel(child=oneweekgraph,title='1 Week')
+    tab1=Panel(child=oneweekgraph,title='1 Week')
     tab2=Panel(child=onemonthgraph,title='1 Month')
     # tab3=Panel(child=threemonthgraph,title='3 Months')
     tab4=Panel(child=sixmonthgraph,title='6 Months')
@@ -128,7 +126,7 @@ def plot():
     stocktable = smalldf.to_html(col_space= '160px',justify='center',index_names=False,float_format=lambda x: '$%10.2f' % x)
 
 
-    tabs=Tabs(tabs=[tab2,tab4,tab5,tab7])
+    tabs=Tabs(tabs=[tab1,tab2,tab4,tab5,tab7])
 
     script1,div1=components(tabs)
 
