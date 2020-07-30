@@ -4,6 +4,7 @@ from bokeh.resources import CDN
 
 app = Flask(__name__)
 
+
 @app.route('/', methods=['GET','POST'])
 def plot():
     import pandas as pd
@@ -11,109 +12,136 @@ def plot():
     import datetime
     from datetime import date
     from bokeh.plotting import figure,show
-    from bokeh.embed import json_item,components,file_html
-    from bokeh.models import Label, Title, NumeralTickFormatter,LinearAxis, Range1d,HoverTool
+    from bokeh.embed import components,file_html
+    from bokeh.models import Label, Title, NumeralTickFormatter,LinearAxis, Range1d,HoverTool,Panel,Tabs
+    # from bokeh.io import vform
 
-    import json
-
-    start = datetime.datetime.now() - datetime.timedelta(days=365)
     end = date.today()
-
+    # start = datetime.datetime.now() - datetime.timedelta(days=900)
 
     tickername = 'TSLA'
     if request.method =='POST':
-
         tickername = request.form['inputticker']
         tickername = tickername.upper()
 
         if tickername == '':
             tickername = 'TSLA'
 
-    try:
-        df = data.DataReader(name=tickername,data_source="yahoo",start=start,end=end)
-    except:
-        tickername = 'TSLA'
-        df = data.DataReader(name=tickername,data_source="yahoo",start=start,end=end)
 
-    sp = data.DataReader(name='^GSPC',data_source = 'yahoo',start = start, end = end)
-    def inc_dec(c,o):
-        if c>o:
-            return "Increase"
-        elif c<o:
-            return "Decrease"
-        else:
-            return "Equal"
-
-    df["Status"] = [inc_dec(c,o) for c,o in zip(df.Close,df.Open)]
-    df["Middle"] = (df.Open+df.Close)/2
-    df['Spread'] = abs(df.Open-df.Close)
+    def getData(tickername=tickername):
+        try:
+            df = data.DataReader(name=tickername,data_source="yahoo",start=0,end=date.today())
+            return df
+        except:
+            tickername = 'TSLA'
+            df = data.DataReader(name=tickername,data_source="yahoo",start=0,end=date.today())
+            return df
 
 
+    def createGraph(start,end,tickername=tickername):
+
+        df = getData(tickername)
+
+        sp = data.DataReader(name='^GSPC',data_source = 'yahoo',start = 0, end = end)
+        def inc_dec(c,o):
+            if c>o:
+                return "Increase"
+            elif c<o:
+                return "Decrease"
+            else:
+                return "Equal"
+
+        df["Status"] = [inc_dec(c,o) for c,o in zip(df.Close,df.Open)]
+        df["Middle"] = (df.Open+df.Close)/2
+        df['Spread'] = abs(df.Open-df.Close)
+
+
+        hours_12=12*60*60*1000
+
+        p = figure(x_axis_type='datetime',width=1000,height=500,sizing_mode='scale_width')
+
+        p.add_tools(HoverTool(
+            tooltips=[
+                ('Date','$x{%F}'),
+                ('Price','$y{($0.00)}')
+
+            ],
+
+            formatters={
+                '$x':'datetime', # use 'datetime' formatter for '@date' field
+
+            },
+
+            # display a tooltip whenever the cursor is vertically in line with a glyph
+            mode='vline'
+        ))
+        # p.title.text=tickername
+        p.grid.grid_line_alpha=.3
+
+
+        #setting the range with what is in the tab
+        try:
+            dfrange = data.DataReader(name=tickername,data_source="yahoo",start=start,end=end)
+        except:
+            tickername = 'TSLA'
+            dfrange = data.DataReader(name=tickername,data_source="yahoo",start=start,end=end)
+
+        sprange = data.DataReader(name='^GSPC',data_source = 'yahoo',start = start, end = end)
+        p.y_range = Range1d(dfrange.Close.min(),dfrange.Close.max())
+        p.x_range= Range1d(dfrange.index.min(),dfrange.index.max())
+        p.extra_y_ranges = {"foo": Range1d(start=sprange.Close.min(),end=sprange.Close.max())}
+        p.add_layout(LinearAxis(y_range_name="foo"),'right')
+
+
+        p.line(sp.index,sp.Close,line_width=1,line_color = 'blue',y_range_name="foo",legend_label = 'S&P 500')
+        p.segment(df.index,df.High,df.index,df.Low,color='black',legend_label = tickername)
+
+        p.rect(df.index[df.Status =='Increase'],df.Middle[df.Status=='Increase'], hours_12,df.Spread[df.Status=='Increase'],fill_color='green',line_color='black',width = 500)
+
+        p.rect(df.index[df.Status == 'Decrease'],df.Middle[df.Status=='Decrease'], hours_12,df.Spread[df.Status=='Decrease'],fill_color='#FF3333',line_color='black', width = 500)
+
+
+        return p
+
+    # oneweekgraph = createGraph(datetime.datetime.now() - datetime.timedelta(days=7),end)
+    onemonthgraph = createGraph(datetime.datetime.now() - datetime.timedelta(days=30),end)
+    # threemonthgraph = createGraph(datetime.datetime.now() - datetime.timedelta(days=90),end)
+    sixmonthgraph = createGraph(datetime.datetime.now() - datetime.timedelta(days=180),end)
+    oneyeargraph = createGraph(datetime.datetime.now() - datetime.timedelta(days=365),end)
+    # threeyeargraph = createGraph(datetime.datetime.now() - datetime.timedelta(days=1090),end)
+    fiveyeargraph = createGraph(datetime.datetime.now() - datetime.timedelta(days=1825),end)
+
+
+    # tab1=Panel(child=oneweekgraph,title='1 Week')
+    tab2=Panel(child=onemonthgraph,title='1 Month')
+    # tab3=Panel(child=threemonthgraph,title='3 Months')
+    tab4=Panel(child=sixmonthgraph,title='6 Months')
+    tab5=Panel(child=oneyeargraph,title='1 Year')
+    # tab6=Panel(child=threeyeargraph,title='3 Years')
+    tab7=Panel(child=fiveyeargraph,title='5 Years')
+
+    df=getData(tickername)
     smalldf = df[-5:][['Open','Adj Close']]
+    smalldf['SortDate'] = pd.to_datetime(smalldf.index)
+    smalldf.sort_values(by=['SortDate'],inplace=True,ascending=False)
+    smalldf = smalldf.drop(columns='SortDate')
     stocktable = smalldf.to_html(col_space= '160px',justify='center',index_names=False,float_format=lambda x: '$%10.2f' % x)
 
-    hours_12=12*60*60*1000
 
-    # print(sp.index)
-    # tool = [
-    # ('Date: ','$x'),
-    # ('Price: ','$y')
-    #
-    # ]
+    tabs=Tabs(tabs=[tab2,tab4,tab5,tab7])
 
+    script1,div1=components(tabs)
 
-    p = figure(x_axis_type='datetime',width=1000,height=500,sizing_mode='scale_width')
-
-    p.add_tools(HoverTool(
-        tooltips=[
-            ('Date','$x{%F}'),
-            ('Price','$y{($0.00)}')
-
-        ],
-
-        formatters={
-            '$x':'datetime', # use 'datetime' formatter for '@date' field
-
-        },
-
-        # display a tooltip whenever the cursor is vertically in line with a glyph
-        mode='vline'
-    ))
-    # p.title.text=tickername
-    p.grid.grid_line_alpha=.3
-    # p.yaxis[0].formatter = NumeralTickFormatter(format='$0,0')
-
-    p.y_range = Range1d(df.Close.min(),df.Close.max())
-
-    p.line(sp.index,sp.Close,line_width=1,line_color = 'blue',y_range_name="foo",legend_label = 'S&P 500')
-    p.segment(df.index,df.High,df.index,df.Low,color='black',legend_label = tickername)
-
-    p.rect(df.index[df.Status =='Increase'],df.Middle[df.Status=='Increase'], hours_12,df.Spread[df.Status=='Increase'],fill_color='green',line_color='black',width = 500)
-
-    p.rect(df.index[df.Status == 'Decrease'],df.Middle[df.Status=='Decrease'], hours_12,df.Spread[df.Status=='Decrease'],fill_color='#FF3333',line_color='black', width = 500)
-
-    p.extra_y_ranges = {"foo": Range1d(start=sp.Close.min(),end=sp.Close.max())}
-    # p.yaxis.formatter = NumeralTickFormatter(format='$0,0')
-    # p.extra_y_ranges.formatter = NumeralTickFormatter(format = '$0,0')
-
-
-
-    p.add_layout(LinearAxis(y_range_name="foo"),'right')
-    script1,div1=components(p)
 
     # show(p)
-    cdn_js=CDN.js_files[0]
-    # kwargs = {'plot_script': script1, 'plot_div': div1}
-    # if request.method == 'GET':
-    #     return render_template("index.html",**kwargs)
+    cdn_js0=CDN.js_files[0]
+    cdn_js1=CDN.js_files[1]
+    cdn_js2=CDN.js_files[2]
+    cdn_js3=CDN.js_files[3]
 
-    # print(cdn_js)
-    #
-    # print(json_item(p))
-    # print(script1)
-    # print(div1)
 
-    return render_template("index.html",script1 = script1,div1=div1,cdn_js=cdn_js,tickername = tickername,stocktable=stocktable)
+
+    return render_template("index.html",script1 = script1,div1=div1,cdn_js0=cdn_js0,cdn_js1=cdn_js1,tickername = tickername,stocktable=stocktable,cdn_js2=cdn_js2,cdn_js3=cdn_js3)
 
 # @app.route('/')
 # def home():

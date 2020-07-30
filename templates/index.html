@@ -160,14 +160,56 @@
           <h2>Stonks</h2>
           <br>
           <h3 for="inputticker">Current Stonk: {{tickername | safe}}</h3>
-          <script type ="text/javascript" src = {{cdn_js | safe}}> </script>
+          <script type ="text/javascript" src = {{cdn_js0 | safe}}> </script>
+          <script type ="text/javascript" src = {{cdn_js1 | safe}}> </script>
+          <script type ="text/javascript" src = {{cdn_js2 | safe}}> </script>
+          <script type ="text/javascript" src = {{cdn_js3 | safe}}> </script>
 
           {{script1 | safe}}
           {{div1 | safe}}
 
+          <br>
+<!--
+          <form id="myForm">
 
-
+            <div class="form-check form-check-inline">
+              <input class="form-check-input" type="radio" name="inlineRadioOptions" id="inlineRadio1" value="1week" onClick='sendValue()'>
+              <label class="form-check-label" for="inlineRadio1">1 Week</label>
+            </div>
+            <div class="form-check form-check-inline">
+              <input class="form-check-input" type="radio" name="inlineRadioOptions" id="inlineRadio2" value="1month">
+              <label class="form-check-label" for="inlineRadio2">1 Month</label>
+            </div>
+            <div class="form-check form-check-inline">
+              <input class="form-check-input" type="radio" name="inlineRadioOptions" id="inlineRadio3" value="3month">
+              <label class="form-check-label" for="inlineRadio3">3 Months</label>
+            </div>
+            <div class="form-check form-check-inline">
+              <input class="form-check-input" type="radio" name="inlineRadioOptions" id="inlineRadio4" value="6month">
+              <label class="form-check-label" for="inlineRadio4">6 Months</label>
+            </div>
+            <div class="form-check form-check-inline">
+              <input class="form-check-input" type="radio" name="inlineRadioOptions" id="inlineRadio5" checked value="1year" onClick='sendValue()'>
+              <label class="form-check-label" for="inlineRadio5">1 Year</label>
+            </div>
+            <div class="form-check form-check-inline">
+              <input class="form-check-input" type="radio" name="inlineRadioOptions" id="inlineRadio6" value="5year">
+              <label class="form-check-label" for="inlineRadio6">5 Years</label>
+            </div>
+            <div class="form-check form-check-inline">
+              <input class="form-check-input" type="radio" name="inlineRadioOptions" id="inlineRadio7" value="all">
+              <label class="form-check-label" for="inlineRadio7">All Time</label>
+            </div>
+</form> -->
         </div>
+        <!-- <script type = 'text/javascript'>
+        function sendValue(){
+          document.getElementById("myForm").submit();
+
+
+        }
+        </script> -->
+
 
 
 
@@ -192,7 +234,7 @@
         </div>
 
       </div>
-    </section><!-- End Stonks Section -->
+
 
   </main><!-- End #main -->
 
