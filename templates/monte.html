@@ -53,7 +53,7 @@
 
       <nav class="nav-menu d-none d-lg-block">
         <ul>
-          <li class="active"><a href="\">Home</a></li>
+          <li class="active"><a href="\">Stonks</a></li>
           <li class="active"><a href="#monte">Return Analysis</a></li>
 
           <!--<li><a href="#portfolio">Portfolio</a></li>
@@ -78,7 +78,7 @@
           </li>
           <li><a href="#contact">Contact</a></li> -->
 
-          <li class="get-started"><a href="#Stonks">Get Started</a></li>
+          <li class="get-started"><a href="#monte">Get Started</a></li>
         </ul>
       </nav><!-- .nav-menu -->
 
@@ -136,10 +136,18 @@
         <div class="explanation" data-aos="fade-up" data-aos-delay="150" >
           <h3>Monte Carlo simulations let us predict how poorly your portfolio will do over time.</h3>
           <br>
-          <p>Enter the stock tickers of your portfolio and how much you have invested in each. </p>
+          <p>Enter the stock tickers of your portfolio and how many shares you have of each. </p>
+          <!-- <p>{{tick}}</p> -->
           <br>
-        </div>
+          <script type ="text/javascript" src = {{cdn_js0 | safe}}> </script>
+          <script type ="text/javascript" src = {{cdn_js1 | safe}}> </script>
+          <script type ="text/javascript" src = {{cdn_js2 | safe}}> </script>
+          <script type ="text/javascript" src = {{cdn_js3 | safe}}> </script>
 
+          {{script | safe}}
+          {{div | safe}}
+        </div>
+        <br>
         <!-- <div class="row content">
           <div class="col-lg-6" data-aos="fade-up" data-aos-delay="150">
             <form method='post'>
@@ -170,8 +178,8 @@
               <input type="text" class="form-control" id="ticker1" placeholder="Ticker" name = "ticker1">
             </div>
             <div class="form-group stock-one col-md-6">
-              <label for="amount1">Amount</label>
-              <input type="number" class="form-control" id="amount1" placeholder="Amount" name = "amount1">
+              <label for="amount1">Shares</label>
+              <input type="number" class="form-control" id="amount1" placeholder="Shares" name = "amount1">
             </div>
           </div>
           <div class="form-row">
@@ -180,8 +188,8 @@
               <input type="text" class="form-control" id="ticker2" placeholder="Ticker" name = "ticker2">
             </div>
             <div class="form-group col-md-6">
-              <label for="amount2">Amount</label>
-              <input type="number" class="form-control" id="amount2" placeholder="Amount" name = "amount2">
+              <label for="amount2">Shares</label>
+              <input type="number" class="form-control" id="amount2" placeholder="Shares" name = "amount2">
             </div>
           </div>
           <div class="form-row">
@@ -190,8 +198,8 @@
               <input type="text" class="form-control" id="ticker3" placeholder="Ticker" name = "ticker3">
             </div>
             <div class="form-group col-md-6">
-              <label for="amount3">Amount</label>
-              <input type="number" class="form-control" id="amount3" placeholder="Amount" name = "amount3">
+              <label for="amount3">Shares</label>
+              <input type="number" class="form-control" id="amount3" placeholder="Shares" name = "amount3">
             </div>
           </div>
           <div class="form-row">
@@ -200,8 +208,8 @@
               <input type="text" class="form-control" id="ticker4" placeholder="Ticker" name = "ticker4">
             </div>
             <div class="form-group col-md-6">
-              <label for="amount4">Amount</label>
-              <input type="number" class="form-control" id="amount4" placeholder="Amount" name = "amount4">
+              <label for="amount4">Shares</label>
+              <input type="number" class="form-control" id="amount4" placeholder="Shares" name = "amount4">
             </div>
           </div>
           <div class="form-row">
@@ -210,8 +218,8 @@
               <input type="text" class="form-control" id="ticker5" placeholder="Ticker" name = "ticker5">
             </div>
             <div class="form-group col-md-6">
-              <label for="amount5">Amount</label>
-              <input type="number" class="form-control" id="amount5" placeholder="Amount" name = "amount5">
+              <label for="amount5">Shares</label>
+              <input type="number" class="form-control" id="amount5" placeholder="Shares" name = "amount5">
             </div>
           </div>
           <div class="form-row">
@@ -220,8 +228,8 @@
               <input type="text" class="form-control" id="ticker6" placeholder="Ticker" name = "ticker6">
             </div>
             <div class="form-group col-md-6">
-              <label for="amount6">Amount</label>
-              <input type="number" class="form-control" id="amount6" placeholder="Amount" name = "amount6">
+              <label for="amount6">Shares</label>
+              <input type="number" class="form-control" id="amount6" placeholder="Shares" name = "amount6">
             </div>
           </div>
           <div class="form-row">
@@ -230,8 +238,8 @@
               <input type="text" class="form-control" id="ticker7" placeholder="Ticker" name = "ticker7">
             </div>
             <div class="form-group col-md-6">
-              <label for="amount7">Amount</label>
-              <input type="number" class="form-control" id="amount7" placeholder="Amount" name = "amount7">
+              <label for="amount7">Shares</label>
+              <input type="number" class="form-control" id="amount7" placeholder="Shares" name = "amount7">
             </div>
           </div>
           <div class="form-row">
@@ -240,8 +248,8 @@
               <input type="text" class="form-control" id="ticker8" placeholder="Ticker" name = "ticker8">
             </div>
             <div class="form-group col-md-6">
-              <label for="amount8">Amount</label>
-              <input type="number" class="form-control" id="amount8" placeholder="Amount" name = "amount8">
+              <label for="amount8">Shares</label>
+              <input type="number" class="form-control" id="amount8" placeholder="Shares" name = "amount8">
             </div>
           </div>
           <div class="form-row">
@@ -250,8 +258,8 @@
               <input type="text" class="form-control" id="ticker9" placeholder="Ticker" name = "ticker9">
             </div>
             <div class="form-group col-md-6">
-              <label for="amount9">Amount</label>
-              <input type="number" class="form-control" id="amount9" placeholder="Amount" name = "amount9">
+              <label for="amount9">Shares</label>
+              <input type="number" class="form-control" id="amount9" placeholder="Shares" name = "amount9">
             </div>
           </div>
           <div class="form-row">
@@ -260,8 +268,8 @@
               <input type="text" class="form-control" id="ticker10" placeholder="Ticker" name = "ticker10">
             </div>
             <div class="form-group col-md-6">
-              <label for="amount10">Amount</label>
-              <input type="number" class="form-control" id="amount10" placeholder="Amount" name = "amount10">
+              <label for="amount10">Shares</label>
+              <input type="number" class="form-control" id="amount10" placeholder="Shares" name = "amount10">
             </div>
           </div>
 

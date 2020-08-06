@@ -147,24 +147,41 @@ def plot():
 
     return render_template("index.html",script1 = script1,div1=div1,cdn_js0=cdn_js0,cdn_js1=cdn_js1,tickername = tickername,stocktable=stocktable,cdn_js2=cdn_js2,cdn_js3=cdn_js3)
 
+
+
+
+
+
+
+
+
+
+
+##### THIS IS THE RETURN ANALYSIS PAGE ####
 @app.route('/monte', methods=['GET','POST'])
 def monte():
     tickers=[]
-    amounts = []
+    amounts_orig = []
+
     if request.method =='POST':
         # tickername = request.form['inputticker']
-
+        time_array = []
+        for i in range(1,365*10):
+            time_array.append(i)
         for x in range(1,11):
             if (request.form["ticker%s" %x]):
                 tickers.append(request.form["ticker%s" %x])
                 if not(request.form["amount%s" %x]):
-                    amounts.append(0)
+                    amounts_orig.append(0.0)
                 else:
-                    amounts.append(request.form["amount%s" %x])
-        def getHistory(tickers):
-            historicals = []
-            for ticker in tickers:
+                    amounts_orig.append(request.form["amount%s" %x])
+                amounts = [float(i) for i in amounts_orig]
+        provided = dict(zip(tickers,amounts))
 
+        def getHistory(tickers):
+            stock={}
+            for ticker in tickers:
+                historicals = []
                 try:
 
                     df = data.DataReader(name=ticker,data_source="yahoo",start=0,end=date.today())
@@ -176,38 +193,120 @@ def monte():
 
                 df["Dif"] = df["Adj Close"].div(df["Adj Close"].shift(1))
                 df["Daily Returns"] = np.log(df["Dif"])
-                print(df)
+
 
                 average = df['Daily Returns'].mean()
-                print(average)
+
                 variance=df['Daily Returns'].var()
-                print(variance)
+
+                last_price = df.loc[df.index[-1],"Adj Close"]
+
                 drift = average-(variance/2)
                 std = df['Daily Returns'].std()
                 inv = norm.ppf(random.uniform(0,1))
+
                 ran = std*inv
-                print(drift)
-                print(ran)
+                historicals.append(last_price)
                 historicals.append(drift)
+                historicals.append(std)
 
                 historicals.append(ran)
 
-                return historicals
+                stock[ticker] = historicals
+
+            return stock
 
 
-        stock =dict(zip(tickers,getHistory(tickers)))
-
-
-
-
-
+        stocks =getHistory(tickers)
 
 
 
 
+        def getStockInfo(stocks):
+            prediction = {}
 
-    # print(stock.get('tsla'))
+            pred_price=[]
 
+
+            for ticker in tickers:
+                pred_price = [stocks.get(ticker)[0]]
+
+                for i in range(1,365*10):
+                    # print(pred_price)
+                    pred_price.append(pred_price[i-1]*math.exp(stocks.get(ticker)[1]+stocks.get(ticker)[2]*norm.ppf(random.uniform(0,1))))
+
+                time_price = dict(zip(time_array,pred_price))
+                prediction[ticker] = time_price
+
+            return prediction
+
+        def createGraph(stocks):
+
+            predictions = [getStockInfo(stocks),getStockInfo(stocks),getStockInfo(stocks),getStockInfo(stocks),getStockInfo(stocks)]
+            # prediction = getStockInfo(stocks)
+            # prediction2 = getStockInfo(stocks)
+            # prediction3 = getStockInfo(stocks)
+            # prediction4 = getStockInfo(stocks)
+
+            for prediction in predictions:
+                portfolio = {}
+
+                for ticker in tickers:
+                    weight = stocks.get(ticker)[-1]
+                    shares = provided[ticker]
+
+
+                    for i in range(1,365*10):
+
+                        try:
+                            current = portfolio.get(i)
+                            new = current+(prediction.get(ticker).get(i)*shares)
+                            portfolio[i] = new
+                        except:
+                            portfolio[i] = prediction.get(ticker).get(i)*shares
+
+                port_array=[]
+                for key,val in portfolio.items():
+                    port_array.append(val)
+
+                time=[]
+                for x in time_array:
+                    time.append(x/365)
+                dfportdata = {"Day":time,"Portfolio Amount":port_array}
+                dfport = pd.DataFrame.from_dict(dfportdata)
+
+
+
+                p.line(dfport["Day"],dfport["Portfolio Amount"])
+                p.line(dfport["Day"],dfport["Portfolio Amount"][0])
+
+
+        p = figure(width=1000,height=500,sizing_mode='scale_width')
+        p.yaxis.formatter=NumeralTickFormatter(format="00")
+        p.xaxis.axis_label = 'Years'
+        p.yaxis.axis_label = 'Portfolio Amount'
+
+
+
+
+
+
+
+        # for i in range(1,3):
+        createGraph(stocks)
+
+        # show(p)
+
+        script,div = components(p)
+        cdn_js0=CDN.js_files[0]
+    
+        cdn_js1=CDN.js_files[1]
+
+        cdn_js2=CDN.js_files[2]
+
+        cdn_js3=CDN.js_files[3]
+
+        return render_template("monte.html",script=script,div=div,tick=tickers[0],cdn_js0=cdn_js0,cdn_js1=cdn_js1,cdn_js2=cdn_js2,cdn_js3=cdn_js3)
 
 
     return render_template("monte.html")
