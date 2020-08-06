@@ -1,19 +1,24 @@
 from flask import Flask, request, render_template
 
 from bokeh.resources import CDN
+import random
+from scipy.stats import norm
+import math
+import pandas as pd
+from pandas_datareader import data
+import datetime
+import numpy as np
+from datetime import date
+from bokeh.plotting import figure,show
+from bokeh.embed import components,file_html
+from bokeh.models import Label, Title, NumeralTickFormatter,LinearAxis, Range1d,HoverTool,Panel,Tabs
+
 
 app = Flask(__name__)
 
 
 @app.route('/', methods=['GET','POST'])
 def plot():
-    import pandas as pd
-    from pandas_datareader import data
-    import datetime
-    from datetime import date
-    from bokeh.plotting import figure,show
-    from bokeh.embed import components,file_html
-    from bokeh.models import Label, Title, NumeralTickFormatter,LinearAxis, Range1d,HoverTool,Panel,Tabs
     # from bokeh.io import vform
 
     end = date.today()
@@ -23,6 +28,7 @@ def plot():
     if request.method =='POST':
         tickername = request.form['inputticker']
         tickername = tickername.upper()
+
 
         if tickername == '':
             tickername = 'TSLA'
@@ -82,7 +88,7 @@ def plot():
 
         dfrange = df.loc[start:end]
         sprange = sp.loc[start:end]
-    
+
         p.y_range = Range1d(dfrange.Low.min(),dfrange.High.max())
         p.x_range= Range1d(dfrange.index.min(),dfrange.index.max())
         p.extra_y_ranges = {"foo": Range1d(start=sprange.Low.min(),end=sprange.High.max())}
@@ -140,6 +146,71 @@ def plot():
 
 
     return render_template("index.html",script1 = script1,div1=div1,cdn_js0=cdn_js0,cdn_js1=cdn_js1,tickername = tickername,stocktable=stocktable,cdn_js2=cdn_js2,cdn_js3=cdn_js3)
+
+@app.route('/monte', methods=['GET','POST'])
+def monte():
+    tickers=[]
+    amounts = []
+    if request.method =='POST':
+        # tickername = request.form['inputticker']
+
+        for x in range(1,11):
+            if (request.form["ticker%s" %x]):
+                tickers.append(request.form["ticker%s" %x])
+                if not(request.form["amount%s" %x]):
+                    amounts.append(0)
+                else:
+                    amounts.append(request.form["amount%s" %x])
+        def getHistory(tickers):
+            historicals = []
+            for ticker in tickers:
+
+                try:
+
+                    df = data.DataReader(name=ticker,data_source="yahoo",start=0,end=date.today())
+
+
+                except:
+                    ticker = '^GSPC'
+                    df = data.DataReader(name=ticker,data_source="yahoo",start=0,end=date.today())
+
+                df["Dif"] = df["Adj Close"].div(df["Adj Close"].shift(1))
+                df["Daily Returns"] = np.log(df["Dif"])
+                print(df)
+
+                average = df['Daily Returns'].mean()
+                print(average)
+                variance=df['Daily Returns'].var()
+                print(variance)
+                drift = average-(variance/2)
+                std = df['Daily Returns'].std()
+                inv = norm.ppf(random.uniform(0,1))
+                ran = std*inv
+                print(drift)
+                print(ran)
+                historicals.append(drift)
+
+                historicals.append(ran)
+
+                return historicals
+
+
+        stock =dict(zip(tickers,getHistory(tickers)))
+
+
+
+
+
+
+
+
+
+
+    # print(stock.get('tsla'))
+
+
+
+    return render_template("monte.html")
 
 # @app.route('/')
 # def home():
