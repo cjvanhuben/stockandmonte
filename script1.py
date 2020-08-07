@@ -285,12 +285,7 @@ def monte():
         p.yaxis.formatter=NumeralTickFormatter(format="00")
         p.xaxis.axis_label = 'Years'
         p.yaxis.axis_label = 'Portfolio Amount'
-
-
-
-
-
-
+        p.title.text="Random Trials of Portfolio Projections"
 
         # for i in range(1,3):
         createGraph(stocks)
@@ -299,17 +294,17 @@ def monte():
 
         script,div = components(p)
         cdn_js0=CDN.js_files[0]
-    
+
         cdn_js1=CDN.js_files[1]
 
         cdn_js2=CDN.js_files[2]
 
         cdn_js3=CDN.js_files[3]
 
-        return render_template("monte.html",script=script,div=div,tick=tickers[0],cdn_js0=cdn_js0,cdn_js1=cdn_js1,cdn_js2=cdn_js2,cdn_js3=cdn_js3)
 
+        return render_template("monte.html",script=script,div=div,cdn_js0=cdn_js0,cdn_js1=cdn_js1,cdn_js2=cdn_js2,cdn_js3=cdn_js3,tickers = tickers,amounts=amounts_orig)
 
-    return render_template("monte.html")
+    return render_template("monte.html",tickers=[],amounts=[])
 
 # @app.route('/')
 # def home():
