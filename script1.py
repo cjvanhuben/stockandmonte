@@ -286,6 +286,21 @@ def monte():
         p.xaxis.axis_label = 'Years'
         p.yaxis.axis_label = 'Portfolio Amount'
         p.title.text="Random Trials of Portfolio Projections"
+        p.add_tools(HoverTool(
+            tooltips=[
+                ('Years','$x{(0.00)}'),
+                ('Price','$y{($0,000.00)}')
+
+            ],
+
+            # formatters={
+            #     '$x':'datetime', # use 'datetime' formatter for '@date' field
+            #
+            # },
+
+            # display a tooltip whenever the cursor is vertically in line with a glyph
+            mode='vline'
+        ))
 
         # for i in range(1,3):
         createGraph(stocks)
